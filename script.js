@@ -35,6 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // on form submit
   async function submitForm(e) {
     e.preventDefault();
+
+    const regex = /^([a-zA-Z]|[à-ü]|[À-Ü]){2,}$/;
+    if (!this.search.value.match(regex)) {
+      return false;
+    }
     
     const rawQuery = this.search.value.trim(); // input value from the form
 
