@@ -15,15 +15,14 @@
 
     <main>
 
-      <section>
-        <form id="form">
-          <label for="search">City name</label>
-          <input type="text" name="search" id="search">
-          <input type="submit" value="Search">
-        </form>
-        <figure>
-          <img id="map" src="" alt="">
-          <div>
+      <section id="forecast">
+        <div>
+          <form id="form">
+            <label for="search">City name</label>
+            <input type="text" name="search" id="search">
+            <input type="submit" value="Search">
+          </form>
+          <div id="display">
             <h2 id="city-name"></h2>
             <p data-forecast="weather"></p>
             <p data-forecast="temperature"></p>
@@ -31,20 +30,23 @@
             <p data-forecast="wind"></p>
             <p data-forecast="pressure"></p>
           </div>
-        </figure>
+        </div>
+        <div class="map-wrapper">
+          <img id="map" src="./placeholder-image.png" alt="placeholder image">
+        </div>
       </section>
 
-      <section>
+      <section id="events">
         <h2>Events</h2>
-        <ol id="events"></ol>
+        <ul id="event-list"></ul>
       </section>
 
       <template id="event-template">
         <li>
-          <a href="" target="_blank">
+          <a href="" title="" target="_blank">
             <h3 data-event="name"></h3>
-            <time data-event="time"></time>
             <address data-event="address"></address>
+            <time data-event="time"></time>
           </a>
         </li>
       </template>

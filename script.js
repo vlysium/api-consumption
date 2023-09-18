@@ -15,7 +15,14 @@ import Geohash from 'https://cdn.jsdelivr.net/npm/latlon-geohash@2.0.0' // latit
 // initiate function on window load
 document.addEventListener("DOMContentLoaded", () => {
 
-  const input = { "query": "", "latitude": 0, "longitude": 0, "geohash": "", "countryCode": "" };
+  const input = {
+    "query": "",
+    "latitude": 0,
+    "longitude": 0,
+    "geohash": "",
+    "countryCode": ""
+  };
+
   const output = {
     "openweathermap": {},
     "mapbox": "",
@@ -102,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // get image url from MapBox
   function getMapBoxData({ latitude, longitude }) {
     try {
-      return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${longitude},${latitude},8,0/720x720?access_token=${API_KEY.MAPBOX}`;
+      return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${longitude},${latitude},8,0/512x512?access_token=${API_KEY.MAPBOX}`;
     } catch (error) {
       console.error(error);
     }
@@ -114,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?size=10&geoPoint=${geohash}&unit=km&sort=distance,date,asc&countryCode=${countryCode}&apikey=${API_KEY.TICKETMASTER}`, { method: "GET" });
       const data = await response.json();
 
-      const filteredData = data._embedded?.events ?? null;
+      const filteredData = data._embedded?.events ?? []; // get the relevant data only if there are events
 
       return filteredData;
 
@@ -133,8 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function displayData({openweathermap, mapbox, ticketmaster}) {
-    console.log(input)
-    console.log(output)
+    console.log(input);
+    console.log(output);
+
+    const forecastBox = document.querySelector("#display");
+    if (!forecastBox.classList.contains("active")) {
+      forecastBox.classList.add("active");
+    }
 
     // OpenWeatherMap
 
@@ -165,24 +177,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // TicketMaster
 
-    const eventList = document.querySelector("#events"); // parent element for the events
+    const eventList = document.querySelector("#event-list"); // parent element for the events
     const eventTemplate = document.querySelector("#event-template"); // template fragment for event
     
-    eventList.innerHTML = "";
+    if (ticketmaster.length > 0) {
+      eventList.innerHTML = "";
+    } else {
+      eventList.textContent = `No events available in ${input.query}`;
+    }
 
     if (ticketmaster) {
       ticketmaster.forEach((ticketmasterEvent) => {
         const eventClone = document.importNode(eventTemplate.content, true);
+
+        const eventAnchorClone = eventClone.querySelector("a");
+        eventAnchorClone.setAttribute("href", ticketmasterEvent.url);
+        eventAnchorClone.setAttribute("title", ticketmasterEvent.name);
   
         const eventNameClone = eventClone.querySelector("[data-event=\"name\"]");
         eventNameClone.textContent = ticketmasterEvent.name;
 
-        const eventTimeClone = eventClone.querySelector("[data-event=\"time\"]");
-        eventTimeClone.textContent = `${ticketmasterEvent.dates.start.localDate} ${ticketmasterEvent.dates.start.localTime ?? ""}`.trim();
-
         // ! the venue address is possibly unrelated to the event address, I don't know ¯\_(ツ)_/¯
         const eventAddressClone = eventClone.querySelector("[data-event=\"address\"]");
         eventAddressClone.textContent = ticketmasterEvent._embedded.venues[0].address.line1;
+
+        const eventTimeClone = eventClone.querySelector("[data-event=\"time\"]");
+        eventTimeClone.textContent = `${ticketmasterEvent.dates.start.localDate} ${ticketmasterEvent.dates.start.localTime ?? ""}`.trim();
   
         eventList.appendChild(eventClone);
       })
